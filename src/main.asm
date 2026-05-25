@@ -1,0 +1,58 @@
+default rel
+%include "game.inc"
+
+section .data
+    window_title db "Space Invaders - Modular x86_64", 0
+
+section .bss
+    running resb 1
+
+section .text
+    global main
+
+main:
+    push rbp
+    mov rbp, rsp
+    
+    ; 1. Inicialización de sistemas delegada
+    mov rdi, window_title
+    call init_video
+    cmp rax, 0
+    jl .error
+
+    call init_input
+    call init_player
+    
+    mov dword [current_wave], 0
+    call init_wave
+    
+    mov byte [running], 1
+
+.game_loop:
+    cmp byte [running], 0
+    je .cleanup
+
+    ; --- 2. Bucle principal del juego delegando responsabilidades ---
+    call poll_events
+    
+    call update_player
+    call update_bullets
+    call update_enemies
+    
+    call check_collisions
+    
+    call render_frame
+    
+    jmp .game_loop
+
+.error:
+    mov eax, 1
+    jmp .exit
+
+.cleanup:
+    call cleanup_video
+    mov eax, 0
+
+.exit:
+    pop rbp
+    ret

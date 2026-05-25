@@ -1,0 +1,9 @@
+# Binarios y Objetos
+obj/
+space_invaders
+
+# Temporales y editores
+*.o
+*~
+*.swp
+.DS_Store
