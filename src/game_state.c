@@ -1,0 +1,83 @@
+#include "game_state.h"
+
+// --- Declaración de variables globales definidas en el código ASM ---
+// El compilador de C y el enlazador (LD/GCC) resolverán estos símbolos a las
+// mismas direcciones de memoria utilizadas por tus archivos .asm.
+extern int32_t score;        // Definido en ui.asm (dword / dd)
+extern int32_t lives;        // Definido en player.asm (dword / dd)
+extern int32_t current_wave;  // Definido en enemies.asm (dword / resd)
+
+// Instancia global en C para cumplir con la interfaz
+GameState g_game_state = {
+    .score = 0,
+    .lives = 3,
+    .current_round = 1,
+    .enemy_speed = 2.0f,
+    .enemy_fire_rate = 2.0f
+};
+
+void inicializar_juego(void) {
+    // Sincronizar ASM
+    score = 0;
+    lives = 3;
+    current_wave = 0;
+    
+    // Sincronizar C
+    g_game_state.score = 0;
+    g_game_state.lives = 3;
+    g_game_state.current_round = 1;
+    g_game_state.enemy_speed = 2.0f;
+    g_game_state.enemy_fire_rate = 2.0f;
+}
+
+void avanzar_ronda(void) {
+    // 1. Cargar estado actual de las variables de ASM
+    g_game_state.score = score;
+    g_game_state.lives = lives;
+    g_game_state.current_round = current_wave + 1; // Ronda es 1-indexed, wave es 0-indexed
+    
+    // 2. Incrementar ronda y dificultad matemáticamente
+    g_game_state.current_round++;
+    g_game_state.enemy_speed *= 1.20f;
+    g_game_state.enemy_fire_rate /= 1.15f;
+    
+    // 3. Escribir cambios de vuelta a ASM
+    current_wave = g_game_state.current_round - 1;
+}
+
+void sumar_puntos(int32_t puntos) {
+    score += puntos;
+    g_game_state.score = score;
+}
+
+void perder_vida(void) {
+    if (lives > 0) {
+        lives--;
+    }
+    g_game_state.lives = lives;
+}
+
+// --- Getters que sincronizan dinámicamente con ASM ---
+
+int32_t obtener_puntuacion(void) {
+    g_game_state.score = score;
+    return score;
+}
+
+int32_t obtener_vidas(void) {
+    g_game_state.lives = lives;
+    return lives;
+}
+
+int32_t obtener_ronda(void) {
+    g_game_state.current_round = current_wave + 1;
+    return g_game_state.current_round;
+}
+
+float obtener_velocidad_enemigos(void) {
+    return g_game_state.enemy_speed;
+}
+
+float obtener_tasa_disparo(void) {
+    return g_game_state.enemy_fire_rate;
+}

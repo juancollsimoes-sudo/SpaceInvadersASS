@@ -152,3 +152,6 @@ extern check_collisions
 
 ; Funciones de ui.asm
 extern render_score
+
+; Módulo de Sprites en C
+extern dibujar_sprite

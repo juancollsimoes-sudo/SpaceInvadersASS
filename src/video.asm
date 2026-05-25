@@ -106,32 +106,15 @@ render_frame:
     call SDL_RenderClear
 
     ; --- Dibujar Jugador (Verde) ---
-    mov rdi, [renderer]
-    mov rsi, 0
-    mov rdx, 255
-    mov rcx, 0
-    mov r8, 255
-    call SDL_SetRenderDrawColor
-
-    mov eax, dword [player_x]
-    mov dword [rect_tmp], eax
-    mov eax, dword [player_y]
-    mov dword [rect_tmp + 4], eax
-    mov dword [rect_tmp + 8], PLAYER_WIDTH
-    mov dword [rect_tmp + 12], PLAYER_HEIGHT
-
-    mov rdi, [renderer]
-    lea rsi, [rel rect_tmp]
-    call SDL_RenderFillRect
+    mov edi, 0                          ; SPRITE_PLAYER (0)
+    mov esi, dword [player_x]           ; x
+    mov edx, dword [player_y]           ; y
+    mov ecx, PLAYER_WIDTH               ; dest_w
+    mov r8d, PLAYER_HEIGHT              ; dest_h
+    mov r9d, 0x00FF00FF                 ; Color RGBA: Verde (0x00FF00FF)
+    call dibujar_sprite
 
     ; --- Dibujar Proyectiles (Amarillo) ---
-    mov rdi, [renderer]
-    mov rsi, 255
-    mov rdx, 255
-    mov rcx, 0
-    mov r8, 255
-    call SDL_SetRenderDrawColor
-
     mov r12, 0      ; rcx clobbered by calls, use r12
 .render_bullet_loop:
     cmp r12, MAX_BULLETS
@@ -142,19 +125,16 @@ render_frame:
     je .next_render_bullet
 
     lea rbx, [rel bullet_x]
-    mov eax, dword [rbx + r12*4]
-    mov dword [rect_tmp], eax
+    mov esi, dword [rbx + r12*4]        ; x
     
     lea rbx, [rel bullet_y]
-    mov eax, dword [rbx + r12*4]
-    mov dword [rect_tmp + 4], eax
+    mov edx, dword [rbx + r12*4]        ; y
     
-    mov dword [rect_tmp + 8], BULLET_WIDTH
-    mov dword [rect_tmp + 12], BULLET_HEIGHT
-
-    mov rdi, [renderer]
-    lea rsi, [rel rect_tmp]
-    call SDL_RenderFillRect
+    mov edi, 3                          ; SPRITE_BULLET (3)
+    mov ecx, BULLET_WIDTH               ; dest_w
+    mov r8d, BULLET_HEIGHT              ; dest_h
+    mov r9d, 0xFFFF00FF                 ; Color RGBA: Amarillo (0xFFFF00FF)
+    call dibujar_sprite
 
 .next_render_bullet:
     inc r12
@@ -199,14 +179,18 @@ render_frame:
     add r10d, eax
     
 .no_sine_render:
-    mov dword [rect_tmp], r10d
-    mov dword [rect_tmp + 4], r11d
-    mov dword [rect_tmp + 8], ENEMY_WIDTH
-    mov dword [rect_tmp + 12], ENEMY_HEIGHT
-    
-    mov rdi, [renderer]
-    lea rsi, [rel rect_tmp]
-    call SDL_RenderFillRect
+    ; Elegir el tipo de alien dinámicamente: Calamar (B) para SINE, Cangrejo (A) para el resto
+    mov edi, 1                          ; SPRITE_ALIEN_A (1)
+    cmp byte [r13 + ENEMY_OFFSET_PATTERN], PATTERN_SINE
+    jne .select_alien_sprite
+    mov edi, 2                          ; SPRITE_ALIEN_B (2)
+.select_alien_sprite:
+    mov esi, r10d                       ; x
+    mov edx, r11d                       ; y
+    mov ecx, ENEMY_WIDTH                ; dest_w
+    mov r8d, ENEMY_HEIGHT               ; dest_h
+    mov r9d, 0xFF0000FF                 ; Color RGBA: Rojo (0xFF0000FF)
+    call dibujar_sprite
     
 .render_next_enemy:
     inc r12
