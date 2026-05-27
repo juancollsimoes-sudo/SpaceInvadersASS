@@ -11,6 +11,10 @@ section .rodata
     pattern_jump_table dq update_enemies.pattern_diagonal, update_enemies.pattern_sine, update_enemies.pattern_kamikaze
 
 section .bss
+    ; Alien bullets
+    alien_bullet_active resb MAX_ALIEN_BULLETS
+    alien_bullet_x resd MAX_ALIEN_BULLETS
+    alien_bullet_y resd MAX_ALIEN_BULLETS
     current_wave resd 1
     active_enemies resd 1
     enemy_array resb (MAX_ENEMIES * ENEMY_STRUC_SIZE)
@@ -375,7 +379,7 @@ launch_diver:
     push r12
     push r13
     
-    mov ebx, dword [rel active_enemies]
+    mov ebx, 55
     cmp ebx, 0
     je .done
     
@@ -388,7 +392,7 @@ launch_diver:
     mov r12d, edx           ; Candidato actual
     
 .search_loop:
-    cmp ecx, dword [rel active_enemies]
+    cmp ecx, 55
     jge .done
     
     mov eax, r12d
@@ -402,7 +406,7 @@ launch_diver:
     
     ; Siguiente candidato
     inc r12d
-    cmp r12d, dword [rel active_enemies]
+    cmp r12d, 55
     jl .no_index_wrap
     mov r12d, 0
 .no_index_wrap:

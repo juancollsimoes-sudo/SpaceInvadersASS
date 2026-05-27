@@ -31,12 +31,16 @@
 %define PLAYER_HEIGHT           20
 %define PLAYER_SPEED            5
 
-; Proyectil
+; Proyectil Jugador
 %define BULLET_WIDTH            4
 %define BULLET_HEIGHT           15
 %define BULLET_SPEED            10
 %define MAX_BULLETS             5
 %define BULLET_COOLDOWN_FRAMES  15
+
+; Proyectil Enemigo
+%define MAX_ALIEN_BULLETS       10
+%define ALIEN_BULLET_SPEED      7
 
 ; Enemigos
 %define ENEMY_ROWS              5
@@ -118,6 +122,9 @@ extern bullet_cooldown
 extern current_wave
 extern active_enemies
 extern enemy_array
+extern alien_bullet_active
+extern alien_bullet_x
+extern alien_bullet_y
 
 ; Desde ui.asm
 extern score
@@ -159,3 +166,6 @@ extern dibujar_sprite
 ; Módulo de Menu y Colores en C
 extern ejecutar_menu
 extern obtener_color_sprite
+
+; Módulo de Estado del Juego
+extern obtener_cooldown_frames_alien

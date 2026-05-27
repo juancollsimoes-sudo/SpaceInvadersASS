@@ -81,3 +81,9 @@ float obtener_velocidad_enemigos(void) {
 float obtener_tasa_disparo(void) {
     return g_game_state.enemy_fire_rate;
 }
+
+int32_t obtener_cooldown_frames_alien(void) {
+    // Convierte el multiplicador de fire_rate a frames (60fps). 
+    // Ej: 2.0 = 120 frames, 1.0 = 60 frames.
+    return (int32_t)(g_game_state.enemy_fire_rate * 60.0f);
+}

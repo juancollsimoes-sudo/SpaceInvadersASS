@@ -147,6 +147,33 @@ render_frame:
     inc r12
     jmp .render_bullet_loop
 
+    ; --- Dibujar Balas Alienígenas (Rojo Fijo) ---
+.render_alien_bullets_start:
+    mov r12, 0
+.render_ab_loop:
+    cmp r12, MAX_ALIEN_BULLETS
+    jge .render_enemies_start
+    
+    lea rbx, [rel alien_bullet_active]
+    cmp byte [rbx + r12], 0
+    je .next_render_ab
+    
+    lea rbx, [rel alien_bullet_x]
+    mov esi, dword [rbx + r12*4]
+    
+    lea rbx, [rel alien_bullet_y]
+    mov edx, dword [rbx + r12*4]
+    
+    mov edi, 3                          ; SPRITE_BULLET (3)
+    mov ecx, BULLET_WIDTH               ; dest_w
+    mov r8d, BULLET_HEIGHT              ; dest_h
+    mov r9d, 0xFF0000FF                 ; Color RGBA: Rojo Fijo
+    call dibujar_sprite
+    
+.next_render_ab:
+    inc r12
+    jmp .render_ab_loop
+
 .render_enemies_start:
     ; --- Dibujar Enemigos (Rojo) ---
     mov rdi, [renderer]
