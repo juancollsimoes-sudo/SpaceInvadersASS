@@ -155,3 +155,7 @@ extern render_score
 
 ; Módulo de Sprites en C
 extern dibujar_sprite
+
+; Módulo de Menu y Colores en C
+extern ejecutar_menu
+extern obtener_color_sprite

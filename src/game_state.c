@@ -1,4 +1,5 @@
 #include "game_state.h"
+#include "difficulty.h"
 
 // --- Declaración de variables globales definidas en el código ASM ---
 // El compilador de C y el enlazador (LD/GCC) resolverán estos símbolos a las
@@ -19,15 +20,14 @@ GameState g_game_state = {
 void inicializar_juego(void) {
     // Sincronizar ASM
     score = 0;
-    lives = 3;
     current_wave = 0;
     
     // Sincronizar C
     g_game_state.score = 0;
-    g_game_state.lives = 3;
     g_game_state.current_round = 1;
-    g_game_state.enemy_speed = 2.0f;
-    g_game_state.enemy_fire_rate = 2.0f;
+    
+    // Aplicar los valores de la dificultad actual (lives, speed, fire_rate)
+    aplicar_dificultad(obtener_dificultad_actual());
 }
 
 void avanzar_ronda(void) {

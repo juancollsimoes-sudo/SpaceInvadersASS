@@ -105,13 +105,16 @@ render_frame:
     mov rdi, [renderer]
     call SDL_RenderClear
 
-    ; --- Dibujar Jugador (Verde) ---
+    ; --- Dibujar Jugador ---
+    mov edi, 0                          ; SPRITE_PLAYER (0)
+    call obtener_color_sprite
+    mov r9d, eax
+
     mov edi, 0                          ; SPRITE_PLAYER (0)
     mov esi, dword [player_x]           ; x
     mov edx, dword [player_y]           ; y
     mov ecx, PLAYER_WIDTH               ; dest_w
     mov r8d, PLAYER_HEIGHT              ; dest_h
-    mov r9d, 0x00FF00FF                 ; Color RGBA: Verde (0x00FF00FF)
     call dibujar_sprite
 
     ; --- Dibujar Proyectiles (Amarillo) ---
@@ -124,6 +127,10 @@ render_frame:
     cmp byte [rbx + r12], 0
     je .next_render_bullet
 
+    mov edi, 3                          ; SPRITE_BULLET (3)
+    call obtener_color_sprite
+    mov r14d, eax
+
     lea rbx, [rel bullet_x]
     mov esi, dword [rbx + r12*4]        ; x
     
@@ -133,7 +140,7 @@ render_frame:
     mov edi, 3                          ; SPRITE_BULLET (3)
     mov ecx, BULLET_WIDTH               ; dest_w
     mov r8d, BULLET_HEIGHT              ; dest_h
-    mov r9d, 0xFFFF00FF                 ; Color RGBA: Amarillo (0xFFFF00FF)
+    mov r9d, r14d                       ; Color dinámico
     call dibujar_sprite
 
 .next_render_bullet:
@@ -166,6 +173,16 @@ render_frame:
     je .do_render
     jmp .render_next_enemy
 .do_render:
+    ; Elegir el tipo de alien dinámicamente
+    mov edi, 1                          ; SPRITE_ALIEN_A (1)
+    cmp byte [r13 + ENEMY_OFFSET_PATTERN], PATTERN_SINE
+    jne .get_alien_color
+    mov edi, 2                          ; SPRITE_ALIEN_B (2)
+.get_alien_color:
+    push rdi
+    call obtener_color_sprite
+    mov r14d, eax
+    pop rdi
     
     mov r10d, dword [r13 + ENEMY_OFFSET_X]
     mov r11d, dword [r13 + ENEMY_OFFSET_Y]
@@ -179,17 +196,11 @@ render_frame:
     add r10d, eax
     
 .no_sine_render:
-    ; Elegir el tipo de alien dinámicamente: Calamar (B) para SINE, Cangrejo (A) para el resto
-    mov edi, 1                          ; SPRITE_ALIEN_A (1)
-    cmp byte [r13 + ENEMY_OFFSET_PATTERN], PATTERN_SINE
-    jne .select_alien_sprite
-    mov edi, 2                          ; SPRITE_ALIEN_B (2)
-.select_alien_sprite:
     mov esi, r10d                       ; x
     mov edx, r11d                       ; y
     mov ecx, ENEMY_WIDTH                ; dest_w
     mov r8d, ENEMY_HEIGHT               ; dest_h
-    mov r9d, 0xFF0000FF                 ; Color RGBA: Rojo (0xFF0000FF)
+    mov r9d, r14d                       ; Color dinámico
     call dibujar_sprite
     
 .render_next_enemy:
