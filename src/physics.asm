@@ -14,6 +14,7 @@ check_collisions:
     push r13
     push r14
     push r15
+    sub rsp, 8              ; Alinear pila a 16 bytes (System V ABI)
 
     mov rcx, 0
     lea r9, [rel enemy_array]
@@ -80,8 +81,18 @@ check_collisions:
     add dword [score], 10
 
     extern rust_play_sound
+    push rcx
+    push r9
+    push r10
+    push r11
+    
     mov edi, 1 ; SOUND_EXPLOSION
     call rust_play_sound
+    
+    pop r11
+    pop r10
+    pop r9
+    pop rcx
     
     lea rbx, [rel bullet_active]
     mov byte [rbx + r14], 0
@@ -118,8 +129,18 @@ check_collisions:
     sub dword [lives], 1
     
     extern rust_play_sound
+    push rcx
+    push r9
+    push r10
+    push r11
+
     mov edi, 2 ; SOUND_PLAYER_DEATH
     call rust_play_sound
+    
+    pop r11
+    pop r10
+    pop r9
+    pop rcx
 
     cmp dword [lives], 0
     jg .reset_player
@@ -144,6 +165,7 @@ check_collisions:
     jmp .enemy_loop
 
 .done:
+    add rsp, 8
     pop r15
     pop r14
     pop r13

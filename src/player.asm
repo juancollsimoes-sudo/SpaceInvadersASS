@@ -101,8 +101,22 @@ update_player:
 
 .fire_bullet:
     extern rust_play_sound
+    push rcx
+    push rdx
+    push r8
+    push r9
+    push r10
+    push r11
+    
     mov edi, 0
     call rust_play_sound
+    
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rdx
+    pop rcx
 
     mov byte [bullet_active + rcx], 1
     
