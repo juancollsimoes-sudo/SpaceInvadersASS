@@ -6,7 +6,8 @@ CARGO = cargo
 
 # Banderas
 ASMFLAGS = -f elf64
-CFLAGS = -Wall -Wextra -O2 -I$(INC_DIR) -D_GNU_SOURCE
+INC_FLAGS = -I$(INC_DIR) -I$(INC_DIR)/models -I$(INC_DIR)/views -I$(INC_DIR)/controllers
+CFLAGS = -Wall -Wextra -O2 $(INC_FLAGS) -D_GNU_SOURCE
 # -no-pie se suele requerir para evitar problemas con código independiente de posición en algunos sistemas modernos
 LDFLAGS = -no-pie -lSDL2 -lpthread -ldl -lm -lasound
 
@@ -16,8 +17,8 @@ OBJ_DIR = obj
 INC_DIR = include
 
 # Archivos fuente y objetos (Híbridos C / ASM)
-ASM_SRCS = $(wildcard $(SRC_DIR)/*.asm)
-C_SRCS   = $(wildcard $(SRC_DIR)/*.c)
+ASM_SRCS = $(wildcard $(SRC_DIR)/*/*.asm $(SRC_DIR)/*.asm)
+C_SRCS   = $(wildcard $(SRC_DIR)/*/*.c $(SRC_DIR)/*.c)
 
 ASM_OBJS = $(patsubst $(SRC_DIR)/%.asm, $(OBJ_DIR)/%_asm.o, $(ASM_SRCS))
 C_OBJS   = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%_c.o, $(C_SRCS))
@@ -41,10 +42,12 @@ $(RUST_LIB): rust_core/src/*.rs rust_core/Cargo.toml
 
 # Ensamblado de archivos ASM
 $(OBJ_DIR)/%_asm.o: $(SRC_DIR)/%.asm | $(OBJ_DIR)
-	$(ASM) $(ASMFLAGS) -I$(INC_DIR)/ -o $@ $<
+	@mkdir -p $(dir $@)
+	$(ASM) $(ASMFLAGS) $(INC_FLAGS) -o $@ $<
 
 # Compilación de archivos C
 $(OBJ_DIR)/%_c.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # Creación de directorio obj/ si no existe
