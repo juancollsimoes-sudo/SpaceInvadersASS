@@ -8,7 +8,7 @@ CARGO = cargo
 ASMFLAGS = -f elf64
 CFLAGS = -Wall -Wextra -O2 -I$(INC_DIR) -D_GNU_SOURCE
 # -no-pie se suele requerir para evitar problemas con código independiente de posición en algunos sistemas modernos
-LDFLAGS = -no-pie -lSDL2 -lpthread -ldl -lm
+LDFLAGS = -no-pie -lSDL2 -lpthread -ldl -lm -lasound
 
 # Directorios
 SRC_DIR = src

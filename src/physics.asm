@@ -76,9 +76,15 @@ check_collisions:
 
     ; Colisión detectada
     mov byte [r9 + ENEMY_OFFSET_STATUS], 0
+    dec dword [active_enemies]
+    add dword [score], 10
+
+    extern rust_play_sound
+    mov edi, 1 ; SOUND_EXPLOSION
+    call rust_play_sound
+    
     lea rbx, [rel bullet_active]
     mov byte [rbx + r14], 0
-    add dword [score], 10
     jmp .next_enemy
 
 .next_bullet_col:
@@ -110,6 +116,11 @@ check_collisions:
 
     ; Colisión jugador
     sub dword [lives], 1
+    
+    extern rust_play_sound
+    mov edi, 2 ; SOUND_PLAYER_DEATH
+    call rust_play_sound
+
     cmp dword [lives], 0
     jg .reset_player
     

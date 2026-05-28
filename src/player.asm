@@ -100,6 +100,10 @@ update_player:
     jmp .find_bullet
 
 .fire_bullet:
+    extern rust_play_sound
+    mov edi, 0
+    call rust_play_sound
+
     mov byte [bullet_active + rcx], 1
     
     mov eax, dword [player_x]

@@ -17,4 +17,13 @@ typedef struct {
 
 extern GameConfig load_game_config(void);
 
+/* ── Fase 4: Audio ───────────────────────────────────────────────── */
+#define SOUND_SHOOT         0
+#define SOUND_EXPLOSION     1
+#define SOUND_PLAYER_DEATH  2
+#define SOUND_BACKGROUND    3
+
+extern int32_t rust_init_audio(void);
+extern void rust_play_sound(int32_t sound_id);
+
 #endif /* RUST_BINDINGS_H */

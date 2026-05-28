@@ -23,6 +23,9 @@ main:
     extern inicializar_configuracion
     call inicializar_configuracion
 
+    extern rust_init_audio
+    call rust_init_audio
+
     call init_input
     call init_player
     
@@ -32,7 +35,7 @@ main:
     
     ; 1.5. Pantalla de Inicio (Menu) en C
     call ejecutar_menu
-    cmp rax, 0
+    cmp eax, 0
     jl .cleanup
     
     mov dword [current_wave], 0
