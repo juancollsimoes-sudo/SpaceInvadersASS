@@ -23,6 +23,10 @@ main:
     call init_input
     call init_player
     
+    ; Fase 2: Cargar high score al iniciar
+    extern load_high_score
+    call load_high_score
+    
     ; 1.5. Pantalla de Inicio (Menu) en C
     call ejecutar_menu
     cmp rax, 0
@@ -55,6 +59,9 @@ main:
     jmp .exit
 
 .cleanup:
+    ; Fase 2: Guardar high score al terminar
+    extern check_and_save_high_score
+    call check_and_save_high_score
     call cleanup_video
     mov eax, 0
 

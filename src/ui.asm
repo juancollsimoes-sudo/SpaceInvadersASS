@@ -3,6 +3,7 @@ default rel
 
 section .data
     score dd 0
+    high_score dd 0
 
 section .rodata
     font_lut db 14, 17, 17, 17, 14  ; 0

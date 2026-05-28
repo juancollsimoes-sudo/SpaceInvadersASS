@@ -1,0 +1,22 @@
+[package]
+name = "space_invaders_core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "space_invaders_core"
+crate-type = ["staticlib"]
+
+[dependencies]
+# Fase 3 — parsing TOML ligero sin std complejo
+toml      = "0.8"
+serde     = { version = "1", features = ["derive"] }
+
+# Fase 4 — audio de alto rendimiento
+rodio     = "0.19"
+
+[profile.release]
+opt-level = 3
+lto       = true
+codegen-units = 1
+panic     = "abort"   # CRÍTICO: evita unwind a través de FFI

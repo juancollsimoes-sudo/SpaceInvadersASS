@@ -1,5 +1,6 @@
 #include "game_state.h"
 #include "difficulty.h"
+#include "rust_bindings.h"
 
 // --- Declaración de variables globales definidas en el código ASM ---
 // El compilador de C y el enlazador (LD/GCC) resolverán estos símbolos a las
@@ -86,4 +87,11 @@ int32_t obtener_cooldown_frames_alien(void) {
     // Convierte el multiplicador de fire_rate a frames (60fps). 
     // Ej: 2.0 = 120 frames, 1.0 = 60 frames.
     return (int32_t)(g_game_state.enemy_fire_rate * 60.0f);
+}
+
+void check_and_save_high_score(void) {
+    int current_best = load_high_score();
+    if (score > current_best) {
+        save_high_score(score);
+    }
 }

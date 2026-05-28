@@ -7,3 +7,8 @@ space_invaders
 *~
 *.swp
 .DS_Store
+
+# Rust / Cargo
+rust_core/target/
+rust_core/Cargo.lock
+high_score.dat
