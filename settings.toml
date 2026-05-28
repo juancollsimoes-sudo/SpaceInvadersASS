@@ -1,0 +1,5 @@
+[game]
+player_lives       = 3
+player_speed       = 4.5
+alien_shoot_rate   = 0.02
+initial_difficulty = 1

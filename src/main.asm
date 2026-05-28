@@ -20,6 +20,9 @@ main:
     cmp rax, 0
     jl .error
 
+    extern inicializar_configuracion
+    call inicializar_configuracion
+
     call init_input
     call init_player
     

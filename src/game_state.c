@@ -18,6 +18,13 @@ GameState g_game_state = {
     .enemy_fire_rate = 2.0f
 };
 
+// Variable global de configuración expuesta para ASM
+GameConfig g_config;
+
+void inicializar_configuracion(void) {
+    g_config = load_game_config();
+}
+
 void inicializar_juego(void) {
     // Sincronizar ASM
     score = 0;
@@ -28,7 +35,12 @@ void inicializar_juego(void) {
     g_game_state.current_round = 1;
     
     // Aplicar los valores de la dificultad actual (lives, speed, fire_rate)
+    // Usar la dificultad de g_config si el menu no lo hizo
     aplicar_dificultad(obtener_dificultad_actual());
+    
+    // Sobrescribir vidas iniciales con el valor del archivo TOML
+    lives = g_config.player_lives;
+    g_game_state.lives = lives;
 }
 
 void avanzar_ronda(void) {

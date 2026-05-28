@@ -1,6 +1,8 @@
 default rel
 %include "game.inc"
 
+extern g_config
+
 section .data
     
     player_x dd 380         ; (800 - 40) / 2
@@ -52,7 +54,8 @@ update_player:
     jne .check_right
     
     mov eax, dword [player_x]
-    sub eax, PLAYER_SPEED
+    cvttss2si edx, dword [g_config + 4] ; Convert float player_speed to int
+    sub eax, edx
     cmp eax, 0
     jge .store_left
     mov eax, 0
@@ -64,7 +67,8 @@ update_player:
     jne .check_shoot
     
     mov eax, dword [player_x]
-    add eax, PLAYER_SPEED
+    cvttss2si edx, dword [g_config + 4]
+    add eax, edx
     mov ecx, WINDOW_WIDTH
     sub ecx, PLAYER_WIDTH
     cmp eax, ecx
