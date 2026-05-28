@@ -1,78 +1,80 @@
-# 👾 Space Invaders - Pure x86_64 Assembly (Modular)
+# 👾 Space Invaders - Hybrid C/ASM/Rust (Modular)
 
-Un clon modular del clásico juego **Space Invaders** escrito completamente en **ensamblador x86_64** para Linux, utilizando la biblioteca **SDL2** para el renderizado de gráficos 2D y la gestión de entradas de teclado. El proyecto está estructurado de manera modular y sigue rigurosamente las especificaciones de la **System V AMD64 ABI** para garantizar un alto rendimiento y estabilidad de memoria.
+Un clon modular del clásico juego **Space Invaders** con una arquitectura híbrida de alto rendimiento. Combina la velocidad extrema del **ensamblador x86_64** puro, la estructura en **C** y la seguridad y ecosistema moderno de **Rust**. Utiliza **SDL2** para el renderizado de gráficos 2D y el teclado, interactuando fluidamente a través de la **System V AMD64 ABI**.
 
 ---
 
 ## 🚀 Características del Proyecto
 
-* **Modularidad Real**: Código dividido en módulos especializados (físicas, entrada, renderizado, jugador, enemigos e interfaz de usuario).
-* **Estabilidad Robusta**: Stack 100% alineado a 16 bytes y preservación estricta de registros de CPU (`RBX`, `R12`-`R15`) según la convención de llamadas de Linux, eliminando errores de violación de segmento.
-* **Inteligencia y Movimiento Independiente**:
-  * Los enemigos ya no se mueven en una cuadrícula rígida; cada uno tiene asignado un patrón de movimiento individual (diagonal con rebote o trayectoria senoidal).
-  * **Ataques en Picada (Diving System)**: Cada ~2 segundos, un enemigo en formación se desprende de forma independiente y persigue agresivamente al jugador a gran velocidad (comportamiento Kamikaze).
-  * **Generación Gradual en Cascada**: Los enemigos aparecen secuencialmente uno a uno, materializándose en la pantalla en lugar de aparecer todos de golpe.
-  * **Reciclado de Enemigos (Screen Wrap)**: Si un enemigo en picada cruza la parte inferior, reaparece dinámicamente en el cielo en una posición aleatoria para reincorporarse al combate.
-* **Progresión Equilibrada**: Cantidad inicial de enemigos reducida a 6 en la primera oleada, con un incremento dinámico y progresivo de dificultad y tamaño de rejilla en cada nivel consecutivo.
-* **Interfaz Retro**: Dibujado del puntaje (score) en tiempo real mediante renderizado de mapas de bits de fuente pixel-art de 5x5 píxeles escrita a mano en ASM.
+* **Arquitectura Híbrida (C/ASM/Rust)**: 
+  * **C**: Inicialización de ventana, bucle de eventos y control de vida útil de SDL2.
+  * **Ensamblador (x86_64)**: Motor de renderizado súper rápido, detección de colisiones de bajo nivel y actualización de matrices en memoria.
+  * **Rust**: IA procedimental, motor asíncrono de audio, parseo de configuraciones y persistencia segura de datos. Todo compilado como una librería estática FFI (`libspace_invaders_core.a`).
+* **Audio Asíncrono (Rodio + MPSC)**: Sistema de sonido en Rust libre de bloqueos. Los eventos de audio (disparos, explosiones) se envían por canales a un hilo dedicado, evitando retrasos en los fotogramas de ASM.
+* **Persistencia Cifrada**: Guarda y carga el "High Score" en un archivo local (`high_score.dat`) utilizando un cifrado XOR seguro implementado en Rust.
+* **Configuración TOML**: El juego lee dinámicamente un archivo `config.toml` (vía Rust) al inicio, permitiendo modificar en tiempo real la velocidad del jugador y los enemigos sin recompilar el código ASM.
+* **IA Procedimental Avanzada**:
+  * Los cálculos complejos de trayectorias (Kamikaze, senoidales, diagonales) han sido exportados a Rust.
+  * **Ataques en Picada (Diving System)**: Enemigos independientes atacan al jugador periódicamente.
+* **Estabilidad Robusta**: Stack alineado a 16 bytes y preservación estricta de registros volátiles y no-volátiles para permitir las complejas llamadas bidireccionales entre ASM y Rust/C.
 
 ---
 
 ## 📂 Arquitectura del Código
 
-El código fuente se encuentra organizado dentro de la carpeta `src/` y las cabeceras en `include/`:
+El código fuente está dividido por ecosistemas:
 
-* **[src/main.asm](src/main.asm)**: El punto de entrada del programa. Inicializa los sistemas y coordina el bucle de juego principal (`game_loop`).
-* **[src/video.asm](src/video.asm)**: Inicialización del subsistema de video de SDL2, creación de la ventana y el renderer, y dibujado de cada fotograma (limpieza de pantalla, jugador, balas y enemigos).
-* **[src/enemies.asm](src/enemies.asm)**: Lógica principal de la IA alienígena. Maneja el spawn en cascada, cálculo de rejillas dinámicas, temporizadores de ataques kamikaze y el algoritmo de reciclado/wrapping.
-* **[src/player.asm](src/player.asm)**: Control de la posición de la nave del jugador, límites de pantalla, enfriamiento (cooldown) y disparo simultáneo de hasta 5 proyectiles activos.
-* **[src/physics.asm](src/physics.asm)**: Detección de colisiones mediante rectángulos delimitadores (AABB) entre balas-enemigos y enemigos-jugador, gestionando vidas y fin del juego.
-* **[src/input.asm](src/input.asm)**: Manejo de eventos de SDL y lectura en tiempo real del mapa de estado del teclado.
-* **[src/ui.asm](src/ui.asm)**: Extrae los dígitos del puntaje y los dibuja en pantalla usando una tabla de búsqueda (LUT) de caracteres pixelados personalizados.
-* **[include/game.inc](include/game.inc)**: Cabecera maestra que define constantes de juego (dimensiones, velocidades, offsets de estructura) y declaraciones `extern` compartidas entre los módulos.
+### Código de Bajo Nivel (C / ASM)
+* **`src/main.asm` / `src/video.asm` / `src/input.asm`**: Motor principal y bucles de renderizado con SDL2.
+* **`src/enemies.asm` / `src/player.asm` / `src/physics.asm`**: Memoria y dibujo de sprites, llamadas FFI a los módulos de Rust (por ej. `rust_update_enemy` y `rust_play_sound`).
+* **`src/menu.c` / `src/difficulty.c`**: Lógica de menús y progresión.
+
+### Core de Alto Nivel (Rust)
+Carpeta `rust_core/src/`:
+* **`lib.rs`**: Interfaz de exportación de C (`#[no_mangle] extern "C"`).
+* **`ai.rs`**: Motor procedimental que calcula y actualiza estructuras de enemigos de 32-bytes directamente en memoria.
+* **`audio.rs`**: Hilo de sonido asíncrono gestionado mediante la crate `rodio` interactuando con ALSA.
+* **`config.rs`**: Deserializador de TOML para la configuración dinámica inyectada al vuelo.
+* **`persistence.rs`**: Lector/Escritor I/O en disco para los puntajes.
 
 ---
 
 ## 🛠️ Requisitos de Instalación
 
-Para compilar y ejecutar este juego en tu sistema Linux (distribuciones basadas en Debian/Ubuntu/Arch), necesitarás instalar el ensamblador NASM, GCC y las librerías de desarrollo de SDL2:
+Para compilar y ejecutar este juego híbrido en Linux (Debian/Ubuntu/Arch), necesitarás instalar el compilador de Rust (`cargo`), NASM, GCC y las librerías de SDL2 y ALSA:
 
 ### En Debian/Ubuntu:
 ```bash
 sudo apt update
-sudo apt install nasm build-essential libsdl2-dev
+sudo apt install nasm build-essential libsdl2-dev libasound2-dev curl
+# Instalar Rust (si no lo tienes)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### En Arch Linux / Manjaro:
 ```bash
-sudo pacman -S nasm base-devel sdl2
+sudo pacman -S nasm base-devel sdl2 alsa-lib rustup
+rustup default stable
 ```
 
 ---
 
 ## ⚙️ Compilación y Ejecución
 
-El proyecto incluye un `Makefile` automatizado para realizar construcciones limpias y eficientes:
+El proyecto incluye un `Makefile` automatizado que orquesta la compilación de la librería de Rust (`cargo build`), el ensamblado (`nasm`) y el enlazado estático final (`gcc`):
 
 1. **Compilar el Proyecto**:
-   Genera el archivo ejecutable binario `space_invaders` y los archivos objeto intermedios en la carpeta `obj/`:
    ```bash
    make
    ```
 
 2. **Ejecutar el Juego**:
-   Puedes ejecutar el binario directamente:
+   Asegúrate de que exista un archivo `config.toml` válido en el mismo directorio (Rust lo leerá al inicio):
    ```bash
    ./space_invaders
    ```
-   O utilizar el script bash automatizado que limpia, compila y arranca el juego en un solo paso:
-   ```bash
-   chmod +x run.sh
-   ./run.sh
-   ```
 
 3. **Limpiar Archivos Generados**:
-   Elimina el ejecutable y todos los archivos objeto compilados para forzar una reconstrucción limpia:
    ```bash
    make clean
    ```
@@ -83,11 +85,11 @@ El proyecto incluye un `Makefile` automatizado para realizar construcciones limp
 
 * **Flecha Izquierda (`←`)**: Mueve la nave hacia la izquierda.
 * **Flecha Derecha (`→`)**: Mueve la nave hacia la derecha.
-* **Barra Espaciadora (`Space`)**: Dispara proyectiles láser (máximo 5 proyectiles en pantalla a la vez).
-* **Cerrar Ventana / Alt + F4**: Sale de la partida de forma segura liberando los recursos de memoria.
+* **Barra Espaciadora (`Space`)**: Dispara proyectiles láser.
+* **Cerrar Ventana / Alt + F4**: Sale del juego guardando tu puntaje de forma segura a través de Rust.
 
 ---
 
 ## 📝 Licencia
 
-Este proyecto es de código abierto y está libre para propósitos de práctica, estudio de arquitectura de computadores x86_64 y programación a bajo nivel en Linux.
+Proyecto de código abierto. Un excelente caso de estudio para quienes deseen aprender sobre interoperabilidad de memorias extremas (FFI), llamadas de la ABI System V y cómo un lenguaje moderno como Rust puede dotar a un motor Assembly puro de capacidades modernas de I/O y asincronía.
