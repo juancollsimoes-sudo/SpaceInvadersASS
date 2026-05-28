@@ -77,7 +77,6 @@ check_collisions:
 
     ; Colisión detectada
     mov byte [r9 + ENEMY_OFFSET_STATUS], 0
-    dec dword [active_enemies]
     add dword [score], 10
 
     extern rust_play_sound
