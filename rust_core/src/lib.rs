@@ -3,7 +3,9 @@
 pub mod persistence;
 pub mod config;
 pub mod audio;
+pub mod ai;
 
 pub use persistence::{save_high_score, load_high_score};
 pub use config::{GameConfig, load_game_config};
 pub use audio::{rust_init_audio, rust_play_sound};
+pub use ai::rust_update_enemy;

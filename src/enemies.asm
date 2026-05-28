@@ -7,8 +7,7 @@ section .rodata
              dd 0, -3, -6, -9, -11, -14, -17, -19, -21, -23, -25, -27, -28, -29, -30, -30
              dd -30, -30, -29, -28, -27, -25, -23, -21, -19, -17, -14, -11, -9, -6, -3, 0
 
-    ; Jump Table para patrones de movimiento
-    pattern_jump_table dq update_enemies.pattern_diagonal, update_enemies.pattern_sine, update_enemies.pattern_kamikaze
+
 
 section .bss
     ; Alien bullets
@@ -218,71 +217,14 @@ update_enemies:
     jmp .next_enemy
     
 .do_update:
-    movzx eax, byte [r9 + ENEMY_OFFSET_PATTERN]
-    lea r15, [rel pattern_jump_table]
-    jmp [r15 + rax*8]
-
-.pattern_diagonal:
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_X]
-    add dword [r9 + ENEMY_OFFSET_X], eax
-    
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_Y]
-    add dword [r9 + ENEMY_OFFSET_Y], eax
-    
-    mov r10d, dword [r9 + ENEMY_OFFSET_X]
-    cmp r10d, 0
-    jle .bounce_x
-    mov eax, r10d
-    add eax, ENEMY_WIDTH
-    cmp eax, WINDOW_WIDTH
-    jge .bounce_x
-    jmp .apply_y
-
-.bounce_x:
-    neg dword [r9 + ENEMY_OFFSET_VEL_X]
-    cmp r10d, 0
-    jle .fix_x_left
-    mov dword [r9 + ENEMY_OFFSET_X], WINDOW_WIDTH - ENEMY_WIDTH
-    jmp .apply_y
-.fix_x_left:
-    mov dword [r9 + ENEMY_OFFSET_X], 0
-    jmp .apply_y
-
-.pattern_sine:
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_Y]
-    add dword [r9 + ENEMY_OFFSET_Y], eax
-    
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_X]
-    add dword [r9 + ENEMY_OFFSET_X], eax
-    
-    mov r10d, dword [r9 + ENEMY_OFFSET_X]
-    cmp r10d, 0
-    jle .bounce_sine
-    mov eax, r10d
-    add eax, ENEMY_WIDTH
-    cmp eax, WINDOW_WIDTH
-    jge .bounce_sine
-    jmp .apply_y
-    
-.bounce_sine:
-    neg dword [r9 + ENEMY_OFFSET_VEL_X]
-    jmp .apply_y
-
-.pattern_kamikaze:
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_Y]
-    add dword [r9 + ENEMY_OFFSET_Y], eax
-    
-    mov eax, dword [player_x]
-    cmp eax, dword [r9 + ENEMY_OFFSET_X]
-    je .apply_y
-    jg .move_right
-    
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_X]
-    sub dword [r9 + ENEMY_OFFSET_X], eax
-    jmp .apply_y
-.move_right:
-    mov eax, dword [r9 + ENEMY_OFFSET_VEL_X]
-    add dword [r9 + ENEMY_OFFSET_X], eax
+    push rcx
+    push r9
+    mov rdi, r9
+    mov esi, dword [player_x]
+    extern rust_update_enemy
+    call rust_update_enemy
+    pop r9
+    pop rcx
 
 .apply_y:
     ; --- Detección de límite inferior (Screen Wrap) ---

@@ -26,4 +26,7 @@ extern GameConfig load_game_config(void);
 extern int32_t rust_init_audio(void);
 extern void rust_play_sound(int32_t sound_id);
 
+/* ── Fase 5: IA Procedimental ────────────────────────────────────── */
+extern void rust_update_enemy(void* enemy, int32_t player_x);
+
 #endif /* RUST_BINDINGS_H */
