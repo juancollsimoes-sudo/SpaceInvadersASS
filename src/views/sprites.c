@@ -63,13 +63,61 @@ static const unsigned char boss_data[] = {
     0,0,1,1,1,1,1,0,0
 };
 
+// Powerup (5x5) - Cubo solido
+static const unsigned char powerup_data[] = {
+    1,1,1,1,1,
+    1,1,1,1,1,
+    1,1,1,1,1,
+    1,1,1,1,1,
+    1,1,1,1,1
+};
+
+// Ultra Boss (15x11) - Nave enorme
+static const unsigned char ultraboss_data[] = {
+    0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
+    0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,
+    0,0,0,1,1,1,0,1,0,1,1,1,0,0,0,
+    0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,
+    0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,
+    0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,
+    0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,
+    0,0,0,0,0,1,1,0,1,1,0,0,0,0,0
+};
+
+// Explosion (7x7)
+static const unsigned char explosion_data[] = {
+    0,0,1,0,1,0,0,
+    0,1,0,0,0,1,0,
+    1,0,1,1,1,0,1,
+    0,0,1,1,1,0,0,
+    1,0,1,1,1,0,1,
+    0,1,0,0,0,1,0,
+    0,0,1,0,1,0,0
+};
+
+// Shield (7x5) - Hollow box to wrap player
+static const unsigned char shield_data[] = {
+    0,1,1,1,1,1,0,
+    1,0,0,0,0,0,1,
+    1,0,0,0,0,0,1,
+    1,0,0,0,0,0,1,
+    0,1,1,1,1,1,0
+};
+
 // Tabla de Sprites indexada directamente por Sprite ID
 static const Sprite sprites[] = {
     [SPRITE_PLAYER]  = { .width = 5, .height = 5, .data = player_data },
     [SPRITE_ALIEN_A] = { .width = 5, .height = 5, .data = alien_a_data },
     [SPRITE_ALIEN_B] = { .width = 5, .height = 5, .data = alien_b_data },
     [SPRITE_BULLET]  = { .width = 3, .height = 5, .data = bullet_data },
-    [SPRITE_BOSS]    = { .width = 9, .height = 9, .data = boss_data }
+    [SPRITE_BOSS]    = { .width = 9, .height = 9, .data = boss_data },
+    [SPRITE_POWERUP] = { .width = 5, .height = 5, .data = powerup_data },
+    [SPRITE_ULTRABOSS] = { .width = 15, .height = 11, .data = ultraboss_data },
+    [SPRITE_EXPLOSION] = { .width = 7, .height = 7, .data = explosion_data },
+    [SPRITE_SHIELD]    = { .width = 7, .height = 5, .data = shield_data }
 };
 
 #define TOTAL_SPRITES ((int32_t)(sizeof(sprites) / sizeof(sprites[0])))

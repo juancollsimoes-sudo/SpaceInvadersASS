@@ -79,15 +79,59 @@ check_collisions:
     mov byte [r9 + ENEMY_OFFSET_STATUS], 0
     add dword [score], 10
     
+    extern player_has_explosive
+    extern trigger_explosion_c
+    extern try_spawn_powerup_c
+    
+    cmp dword [player_has_explosive], 1
+    jne .no_explosion
+    
+    push rcx
+    push r9
+    push r10
+    push r11
+    push r14
+    
+    mov edi, r10d
+    mov esi, r11d
+    call trigger_explosion_c
+    
+    pop r14
+    pop r11
+    pop r10
+    pop r9
+    pop rcx
+    jmp .after_explosion
+
+.no_explosion:
     extern rust_play_sound
     push rcx
     push r9
     push r10
     push r11
+    push r14
     
     mov edi, 1 ; SOUND_EXPLOSION
     call rust_play_sound
     
+    pop r14
+    pop r11
+    pop r10
+    pop r9
+    pop rcx
+
+.after_explosion:
+    push rcx
+    push r9
+    push r10
+    push r11
+    push r14
+    
+    mov edi, r10d
+    mov esi, r11d
+    call try_spawn_powerup_c
+    
+    pop r14
     pop r11
     pop r10
     pop r9
@@ -125,6 +169,28 @@ check_collisions:
     jle .next_enemy
 
     ; Colisión jugador
+    extern player_has_shield
+    cmp dword [player_has_shield], 1
+    jne .take_damage
+    
+    ; Tiene escudo: destruye escudo y nave enemiga sin perder vida
+    mov dword [player_has_shield], 0
+    mov byte [r9 + ENEMY_OFFSET_STATUS], 0
+    
+    extern rust_play_sound
+    push rcx
+    push r9
+    push r10
+    push r11
+    mov edi, 1 ; SOUND_EXPLOSION
+    call rust_play_sound
+    pop r11
+    pop r10
+    pop r9
+    pop rcx
+    jmp .next_enemy
+    
+.take_damage:
     sub dword [lives], 1
     
     extern rust_play_sound

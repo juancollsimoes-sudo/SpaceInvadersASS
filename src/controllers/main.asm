@@ -14,7 +14,6 @@ main:
     push rbp
     mov rbp, rsp
     
-    ; 1. Inicialización de sistemas delegada
     mov rdi, window_title
     call init_video
     cmp rax, 0
@@ -26,15 +25,16 @@ main:
     extern rust_init_audio
     call rust_init_audio
 
+    extern init_powerups_c
+    call init_powerups_c
+
     call init_input
     call init_player
     
-    ; Fase 2: Cargar high score al iniciar
     extern load_high_score
     call load_high_score
     
 .show_menu:
-    ; 1.5. Pantalla de Inicio (Menu) en C
     call ejecutar_menu
     cmp eax, 0
     jl .cleanup
@@ -46,9 +46,8 @@ main:
 
 .game_loop:
     cmp byte [running], 0
-    je .cleanup
+    je .check_death
 
-    ; --- 2. Bucle principal del juego delegando responsabilidades ---
     call poll_events
     
     mov r10, [keyboard_state]
@@ -72,20 +71,51 @@ main:
     extern update_boss_c
     call update_boss_c
     
+    extern update_powerups_c
+    call update_powerups_c
+    
+    extern update_explosions_c
+    call update_explosions_c
+    
     call check_collisions
     extern check_boss_collisions_c
     call check_boss_collisions_c
     
+    extern check_powerup_collisions_c
+    call check_powerup_collisions_c
+    
     call render_frame
     
     jmp .game_loop
+
+.check_death:
+    extern lives
+    cmp dword [lives], 0
+    jg .cleanup
+    
+    ; Guardar score antes de resetear
+    extern check_and_save_high_score
+    call check_and_save_high_score
+    
+    ; Resetear el juego
+    call init_player
+    extern init_powerups_c
+    call init_powerups_c
+    
+    extern score
+    mov dword [score], 0
+    
+    extern boss_active_c
+    mov dword [boss_active_c], 0
+    
+    ; Volver al menú
+    jmp .show_menu
 
 .error:
     mov eax, 1
     jmp .exit
 
 .cleanup:
-    ; Fase 2: Guardar high score al terminar
     extern check_and_save_high_score
     call check_and_save_high_score
     call cleanup_video

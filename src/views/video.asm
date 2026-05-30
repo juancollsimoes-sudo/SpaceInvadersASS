@@ -117,6 +117,24 @@ render_frame:
     mov r8d, PLAYER_HEIGHT              ; dest_h
     call dibujar_sprite
 
+    ; --- Dibujar Escudo (si lo tiene) ---
+    extern player_has_shield
+    cmp dword [player_has_shield], 1
+    jne .no_shield
+    
+    mov edi, 8                          ; SPRITE_SHIELD
+    mov esi, dword [player_x]
+    sub esi, 5
+    mov edx, dword [player_y]
+    sub edx, 5
+    mov ecx, PLAYER_WIDTH
+    add ecx, 10
+    mov r8d, PLAYER_HEIGHT
+    add r8d, 10
+    mov r9d, 0xFFFF00FF                 ; Amarillo
+    call dibujar_sprite
+.no_shield:
+
     ; --- Dibujar Proyectiles (Amarillo) ---
     mov r12, 0      ; rcx clobbered by calls, use r12
 .render_bullet_loop:
@@ -211,6 +229,12 @@ render_frame:
 .render_boss:
     extern render_boss_c
     call render_boss_c
+    
+    extern render_powerups_c
+    call render_powerups_c
+
+    extern render_explosions_c
+    call render_explosions_c
 
 .render_score_call:
     mov rdi, [renderer]

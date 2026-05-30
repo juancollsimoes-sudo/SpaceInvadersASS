@@ -14,6 +14,7 @@ section .bss
     bullet_active resb MAX_BULLETS
     bullet_x resd MAX_BULLETS
     bullet_y resd MAX_BULLETS
+    bullet_vx resd MAX_BULLETS
     bullet_cooldown resd 1
 
 section .text
@@ -29,6 +30,7 @@ init_player:
     mov rcx, MAX_BULLETS
 .clear_bullets:
     mov byte [bullet_active + rcx - 1], 0
+    mov dword [bullet_vx + rcx*4 - 4], 0
     loop .clear_bullets
     
     mov dword [player_x], 380
@@ -89,6 +91,10 @@ update_player:
     cmp dword [bullet_cooldown], 0
     jg .done
 
+    extern player_has_multishot
+    cmp dword [player_has_multishot], 1
+    je .fire_multishot
+
     ; Buscar proyectil libre
     mov rcx, 0
 .find_bullet:
@@ -98,6 +104,59 @@ update_player:
     je .fire_bullet
     inc rcx
     jmp .find_bullet
+
+.fire_multishot:
+    extern rust_play_sound
+    push r10
+    mov edi, 0
+    call rust_play_sound
+    pop r10
+
+    mov r11, 0 ; contador de balas disparadas
+    mov rcx, 0
+.multi_loop:
+    cmp rcx, MAX_BULLETS
+    jge .multi_done
+    cmp r11, 3
+    jge .multi_done
+
+    cmp byte [bullet_active + rcx], 0
+    jne .multi_next
+
+    mov byte [bullet_active + rcx], 1
+    
+    mov eax, dword [player_x]
+    add eax, (PLAYER_WIDTH / 2) - (BULLET_WIDTH / 2)
+    
+    cmp r11, 1
+    je .multi_left
+    cmp r11, 2
+    je .multi_right
+    mov edx, 0
+    jmp .multi_store_x
+.multi_left:
+    sub eax, 15
+    mov edx, -4
+    jmp .multi_store_x
+.multi_right:
+    add eax, 15
+    mov edx, 4
+.multi_store_x:
+    mov dword [bullet_x + rcx*4], eax
+    mov dword [bullet_vx + rcx*4], edx
+
+    mov eax, dword [player_y]
+    sub eax, BULLET_HEIGHT
+    mov dword [bullet_y + rcx*4], eax
+
+    inc r11
+.multi_next:
+    inc rcx
+    jmp .multi_loop
+
+.multi_done:
+    mov dword [bullet_cooldown], BULLET_COOLDOWN_FRAMES
+    jmp .done
 
 .fire_bullet:
     extern rust_play_sound
@@ -123,6 +182,7 @@ update_player:
     mov eax, dword [player_x]
     add eax, (PLAYER_WIDTH / 2) - (BULLET_WIDTH / 2)
     mov dword [bullet_x + rcx*4], eax
+    mov dword [bullet_vx + rcx*4], 0
 
     mov eax, dword [player_y]
     sub eax, BULLET_HEIGHT
@@ -154,6 +214,10 @@ update_bullets:
     mov eax, dword [bullet_y + rcx*4]
     sub eax, BULLET_SPEED
     mov dword [bullet_y + rcx*4], eax
+    
+    mov edx, dword [bullet_x + rcx*4]
+    add edx, dword [bullet_vx + rcx*4]
+    mov dword [bullet_x + rcx*4], edx
     
     cmp eax, 0
     jge .next
