@@ -14,10 +14,16 @@
 %define SDL_QUIT                0x100
 %define SDL_KEYDOWN             0x300
 
+; Keysyms
+%define SDLK_ESCAPE             27
+%define SDLK_p                  112
+
 ; Códigos de teclado (Scancodes)
 %define SDL_SCANCODE_RIGHT      79
 %define SDL_SCANCODE_LEFT       80
 %define SDL_SCANCODE_SPACE      44
+%define SDL_SCANCODE_ESCAPE     41
+%define SDL_SCANCODE_P          19
 
 ; ------------------------------------------------------------------------------
 ; Constantes del Juego
@@ -59,7 +65,7 @@
 %define ENEMY_STRUC_SIZE        32
 %define ENEMY_OFFSET_STATUS     0   ; 1 byte
 %define ENEMY_OFFSET_PATTERN    1   ; 1 byte
-%define ENEMY_OFFSET_PADDING    2   ; 2 bytes
+%define ENEMY_OFFSET_HP         2   ; 2 bytes (word)
 %define ENEMY_OFFSET_X          4   ; 4 bytes (dword)
 %define ENEMY_OFFSET_Y          8   ; 4 bytes (dword)
 %define ENEMY_OFFSET_VEL_X      12  ; 4 bytes (dword)
@@ -70,6 +76,14 @@
 %define PATTERN_DIAGONAL        0
 %define PATTERN_SINE            1
 %define PATTERN_KAMIKAZE        2
+%define PATTERN_BOSS            3
+
+; Status Enemigo
+%define STATUS_DEAD             0
+%define STATUS_NORMAL           1
+%define STATUS_DIVER            2
+%define STATUS_WAITING          3
+%define STATUS_BOSS             4
 
 ; Fuente y UI
 %define FONT_PIXEL_SIZE         4
@@ -108,6 +122,7 @@ extern renderer
 ; Desde input.asm
 extern sdl_event
 extern keyboard_state
+extern pause_requested
 
 ; Desde player.asm
 extern player_x
@@ -122,9 +137,6 @@ extern bullet_cooldown
 extern current_wave
 extern active_enemies
 extern enemy_array
-extern alien_bullet_active
-extern alien_bullet_x
-extern alien_bullet_y
 
 ; Desde ui.asm
 extern score
@@ -165,6 +177,7 @@ extern dibujar_sprite
 
 ; Módulo de Menu y Colores en C
 extern ejecutar_menu
+extern ejecutar_pausa
 extern obtener_color_sprite
 
 ; Módulo de Estado del Juego

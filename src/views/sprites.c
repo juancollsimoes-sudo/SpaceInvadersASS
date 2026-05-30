@@ -50,12 +50,26 @@ static const unsigned char bullet_data[] = {
     0,1,0
 };
 
+// Boss (9x9) - Forma de escudo/calavera
+static const unsigned char boss_data[] = {
+    0,0,1,1,1,1,1,0,0,
+    0,1,0,0,1,0,0,1,0,
+    1,0,1,0,1,0,1,0,1,
+    1,0,0,0,1,0,0,0,1,
+    1,1,1,1,0,1,1,1,1,
+    1,0,0,0,1,0,0,0,1,
+    1,0,1,0,1,0,1,0,1,
+    0,1,0,0,1,0,0,1,0,
+    0,0,1,1,1,1,1,0,0
+};
+
 // Tabla de Sprites indexada directamente por Sprite ID
 static const Sprite sprites[] = {
     [SPRITE_PLAYER]  = { .width = 5, .height = 5, .data = player_data },
     [SPRITE_ALIEN_A] = { .width = 5, .height = 5, .data = alien_a_data },
     [SPRITE_ALIEN_B] = { .width = 5, .height = 5, .data = alien_b_data },
-    [SPRITE_BULLET]  = { .width = 3, .height = 5, .data = bullet_data }
+    [SPRITE_BULLET]  = { .width = 3, .height = 5, .data = bullet_data },
+    [SPRITE_BOSS]    = { .width = 9, .height = 9, .data = boss_data }
 };
 
 #define TOTAL_SPRITES ((int32_t)(sizeof(sprites) / sizeof(sprites[0])))

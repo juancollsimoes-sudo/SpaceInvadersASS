@@ -202,3 +202,60 @@ int32_t ejecutar_menu(void) {
     
     return 0;
 }
+
+int32_t ejecutar_pausa(void) {
+    SDL_Renderer *rnd = (SDL_Renderer *)renderer;
+    if (!rnd) return -1;
+
+    SDL_Event e;
+    int32_t frame_count = 0;
+    int seleccion = 0; // 0 = RESUME, 1 = QUIT
+    
+    while (1) {
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                return -1;
+            }
+            if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_UP || e.key.keysym.sym == SDLK_DOWN) {
+                    seleccion = 1 - seleccion;
+                } else if (e.key.keysym.sym == SDLK_RETURN || e.key.keysym.sym == SDLK_SPACE) {
+                    if (seleccion == 0) return 0;
+                    else return -1;
+                }
+            }
+            if (e.type == SDL_KEYUP) {
+                if (e.key.keysym.sym == SDLK_p || e.key.keysym.sym == SDLK_ESCAPE) {
+                    return 0;
+                }
+            }
+        }
+
+        SDL_SetRenderDrawColor(rnd, 10, 10, 10, 255);
+        SDL_RenderClear(rnd);
+
+        dibujar_texto(250, 150, "PAUSED", COLOR_RETRO_GREEN, 6);
+
+        uint32_t color_resume = (seleccion == 0) ? 0xFFFF00FF : COLOR_RETRO_GREEN;
+        uint32_t color_quit = (seleccion == 1) ? 0xFFFF00FF : COLOR_RETRO_GREEN;
+
+        dibujar_texto(300, 300, "RESUME", color_resume, 4);
+        dibujar_texto(300, 360, "QUIT", color_quit, 4);
+
+        int anim_offset = (frame_count / 15) % 2 == 0 ? 0 : 5;
+        int pointer_y = (seleccion == 0) ? 300 : 360;
+        dibujar_sprite(SPRITE_PLAYER, 240, pointer_y + anim_offset, 30, 30, obtener_color_sprite(SPRITE_PLAYER));
+
+        SDL_SetRenderDrawColor(rnd, 0, 0, 0, 100);
+        SDL_SetRenderDrawBlendMode(rnd, SDL_BLENDMODE_BLEND);
+        for (int y = 0; y < WINDOW_HEIGHT; y += 4) {
+            SDL_RenderDrawLine(rnd, 0, y, WINDOW_WIDTH, y);
+        }
+        SDL_SetRenderDrawBlendMode(rnd, SDL_BLENDMODE_NONE);
+
+        SDL_RenderPresent(rnd);
+        SDL_Delay(16);
+        frame_count++;
+    }
+    return 0;
+}

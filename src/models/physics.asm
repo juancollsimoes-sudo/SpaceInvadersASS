@@ -78,7 +78,7 @@ check_collisions:
     ; Colisión detectada
     mov byte [r9 + ENEMY_OFFSET_STATUS], 0
     add dword [score], 10
-
+    
     extern rust_play_sound
     push rcx
     push r9
@@ -164,6 +164,8 @@ check_collisions:
     jmp .enemy_loop
 
 .done:
+    ; Boss and alien bullet collisions are now handled in C
+.exit_cols:
     add rsp, 8
     pop r15
     pop r14

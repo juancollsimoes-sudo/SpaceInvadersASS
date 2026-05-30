@@ -8,6 +8,7 @@
 #define SPRITE_ALIEN_A     1
 #define SPRITE_ALIEN_B     2
 #define SPRITE_BULLET      3
+#define SPRITE_BOSS        4
 
 /**
  * @brief Estructura que contiene las dimensiones y el puntero al arte

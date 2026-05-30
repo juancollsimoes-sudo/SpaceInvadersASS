@@ -10,10 +10,6 @@ section .rodata
 
 
 section .bss
-    ; Alien bullets
-    alien_bullet_active resb MAX_ALIEN_BULLETS
-    alien_bullet_x resd MAX_ALIEN_BULLETS
-    alien_bullet_y resd MAX_ALIEN_BULLETS
     current_wave resd 1
     active_enemies resd 1
     enemy_array resb (MAX_ENEMIES * ENEMY_STRUC_SIZE)
@@ -33,6 +29,15 @@ init_wave:
     push r13
     push r14
     push r15
+    
+    ; Check if Boss Wave
+    mov eax, dword [current_wave]
+    inc eax
+    mov ebx, 5
+    xor edx, edx
+    div ebx
+    cmp edx, 0
+    je .init_boss_wave
     
     ; Calcular filas y columnas dinámicamente según la wave
     ; Progreso suave que empieza con poca cantidad (6 enemigos: 2 filas x 3 columnas)
@@ -143,6 +148,18 @@ init_wave:
     inc rcx
     jmp .clear_loop
     
+.init_boss_wave:
+    mov dword [active_enemies], 0
+    mov dword [rel attack_timer], 120
+    mov dword [rel spawn_timer], 0
+    
+    extern init_boss_c
+    call init_boss_c
+    
+    lea rdi, [rel enemy_array]
+    mov rcx, 0
+    jmp .clear_loop
+    
 .exit_init:
     inc dword [current_wave]
     
@@ -225,6 +242,7 @@ update_enemies:
     call rust_update_enemy
     pop r9
     pop rcx
+    jmp .apply_y
 
 .apply_y:
     ; --- Detección de límite inferior (Screen Wrap) ---
@@ -296,6 +314,10 @@ update_enemies:
     jmp .count_loop
     
 .check_count:
+    extern boss_active_c
+    cmp dword [rel boss_active_c], 1
+    je .done
+    
     cmp r8d, 0
     jg .done
     call init_wave

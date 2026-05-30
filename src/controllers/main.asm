@@ -33,6 +33,7 @@ main:
     extern load_high_score
     call load_high_score
     
+.show_menu:
     ; 1.5. Pantalla de Inicio (Menu) en C
     call ejecutar_menu
     cmp eax, 0
@@ -50,11 +51,30 @@ main:
     ; --- 2. Bucle principal del juego delegando responsabilidades ---
     call poll_events
     
+    mov r10, [keyboard_state]
+    cmp byte [r10 + SDL_SCANCODE_P], 1
+    je .do_pause
+    cmp byte [r10 + SDL_SCANCODE_ESCAPE], 1
+    jne .no_pause
+
+.do_pause:
+    extern ejecutar_pausa
+    call ejecutar_pausa
+    cmp eax, -1
+    je .show_menu
+
+.no_pause:
+    
     call update_player
     call update_bullets
     call update_enemies
     
+    extern update_boss_c
+    call update_boss_c
+    
     call check_collisions
+    extern check_boss_collisions_c
+    call check_boss_collisions_c
     
     call render_frame
     
